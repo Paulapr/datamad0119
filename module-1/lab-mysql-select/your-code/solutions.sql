@@ -33,7 +33,24 @@ FROM titleauthor
 GROUP BY titles.title
 
 
-CHALLENGE 3
+CHALLENGE 3: NO FUNCIONA, DA ERROR
 ============
+SELECT 
+	titleauthor.au_id AS 'AUTHOR ID',
+    authors.au_lname AS 'LAST NAME',
+    authors.au_fname AS 'FINAL NAME',
+    sales.qty AS 'TOTAL'
+
+FROM titleauthor
+	INNER JOIN authors ON titleauthor.au_id = authors.au_id
+    INNER JOIN sales ON titleauthor.title_id = sales.title_id
+
+ORDER BY TOTAL DESC
+
+LIMIT 3;
+
+
+
+
 
 
