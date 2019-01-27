@@ -101,7 +101,7 @@ GROUP BY AUTHORID
 ORDER BY PROFIT DESC;
 
 
-/* CHALLENGE 3
+/* CHALLENGE 3 Crear tabla permanente
 ==================*/
 
 CREATE TABLE most_profiting_authors
