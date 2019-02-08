@@ -16,7 +16,7 @@ def get_data(dataset):
 
 # 2. WRANGLING
 
-def changecols (dfa):
+def fixeddate (dfa):
   month = []
   for e in dfa["Date"]:
     aux= e.split("-")
@@ -24,28 +24,36 @@ def changecols (dfa):
   dfa['month'] = pd.Series(month, index=dfa.index)
   dfa['year'] = dfa['year'].astype('object')
   dfa['Total Volume']= (dfa['Total Volume']/1000)
-  df_2 = dfa['region','year','month','type','AveragePrice','Total Volume','4046','4225',
-       '4770', 'Total Bags', 'Small Bags', 'Large Bags', 'XLarge Bags']
-  df_2.columns = ['Region','Year','Month','Variety','Avg Price','Total Volume-k',
-        'S-M size','L size','XL size','Total Bags','S bags','L bags','XL bags']
-  return df_2
+  return dfa
 
+def changecols (dfa):
+  column_order = ['region','year','month','type','AveragePrice','Total Volume','4046','4225','4770', 'Total Bags', 'Small Bags', 'Large Bags', 'XLarge Bags']
+  dfa = dfa[column_order]
+  dfa.columns = ['Region','Year','Month','Variety','Avg Price','Total Volume-k','S-M size','L size','XL size','Total Bags','S bags','L bags','XL bags']
+  return dfa
 
-def subdata (df_2):
-  filteredyear = list(df_2[(df_2['Year']==2018)].index) 
-  df_2 = df_2.drop(filteredyear, axis=0)
-  df_totalUS = df_2[(df_2['Region'] == 'TotalUS')]
+def filteryear (dfa):
+  filteredyear = list(dfa[(dfa['Year']==2018)].index) 
+  dfa = dfa.drop(filteredyear, axis=0)
+  return dfa
+
+def subdata1 (dfa):
+  df_totalUS = dfa[(dfa['Region'] == 'TotalUS')]
   return df_totalUS
-  df_region = df_2[(df_2['Region'] == 'Plains')|(df_2['Region'] =='West')|
-              (df_2['Region'] =='California')|(df_2['Region'] =='SouthCentral')|
-              (df_2['Region'] =='Northeast')|(df_2['Region'] =='Southeast')|
-              (df_2['Region'] =='GreatLakes')|(df_2['Region'] =='Midsouth')]
+
+def subdata2 (dfa):
+  df_region = dfa[(dfa['Region'] == 'Plains')|(dfa['Region'] =='West')|
+              (dfa['Region'] =='California')|(dfa['Region'] =='SouthCentral')|
+              (dfa['Region'] =='Northeast')|(dfa['Region'] =='Southeast')|
+              (dfa['Region'] =='GreatLakes')|(dfa['Region'] =='Midsouth')]
   return df_region
-  df_cities= df_2[(df_2['Region'] != 'Plains')|(df_2['Region'] !='West')|
-              (df_2['Region'] !='California')|(df_2['Region'] !='SouthCentral')|
-              (df_2['Region'] !='Northeast')|(df_2['Region'] !='Southeast')|
-              (df_2['Region'] !='GreatLakes')|(df_2['Region'] !='Midsouth')|
-              (df_2['Region'] != 'TotalUS')] 
+
+def subdata3 (dfa):
+  df_cities= dfa[(dfa['Region'] != 'Plains')|(dfa['Region'] !='West')|
+              (dfa['Region'] !='California')|(dfa['Region'] !='SouthCentral')|
+              (dfa['Region'] !='Northeast')|(dfa['Region'] !='Southeast')|
+              (dfa['Region'] !='GreatLakes')|(dfa['Region'] !='Midsouth')|
+              (dfa['Region'] != 'TotalUS')] 
   return df_cities
   
 
@@ -92,7 +100,7 @@ def percentage (df):
   percen_vol= df[['Region','Year','perc_S-M size','perc_L size','perc_XL size','perc_Bags']]
   percen_vol = pd.pivot_table(percen_vol, values=['perc_S-M size','perc_L size','perc_XL size','perc_Bags'], index=['Region'],columns=['Year'])
   return ("Porcentajes de aporte al volumen total \n{}".format(percen_vol))
-'''
+
 # 4. VISUALIZE
 
 def graf_boxplot (df):
@@ -108,16 +116,18 @@ def graf_bar(df,col,title):
 def save_viz(grafico,title):
     fig = grafico.get_figure()
     fig.savefig(title + '.png')
-'''
-  
+
 if __name__ == '__main__':
 
   dataset = 'avocado.csv'
 
   dfa = get_data(dataset)
-  df_2 = changecols(dfa)
-  df_totalUS = subdata (df_2)
-  df_region = subdata (df_2)
+  dfa = fixeddate(dfa)
+  dfa = changecols(dfa)
+  dfa = filteryear(dfa)
+  df_totalUS = subdata1(dfa)
+  df_region = subdata2(dfa)
+  df_cities  = subdata3(dfa)
 
   result1 = price_type (df_totalUS)
   result2 = price_type2 (df_region)
@@ -129,7 +139,7 @@ if __name__ == '__main__':
   result6 = correlacion (df_region)
   result7 = percentage (df_region)
   
-  '''
+ 
   title1 = 'Total volumen de venta por mes'
   title2 = 'Precio medio de venta'
   title3 = 'Box plot variedad-precio medio'
@@ -142,8 +152,7 @@ if __name__ == '__main__':
   save_viz(grafico1,title3)
   save_viz(grafico2,title1)
   save_viz(grafico3,title2)
-  '''
-
+  
 
   ## SEND EMAIL WITH REPORT:
 
@@ -154,4 +163,4 @@ if __name__ == '__main__':
   def bash_command(cmd):
     subprocess.Popen(['/bin/bash', '-c', cmd])
 
-  # $ echo ('Report .odt') | mail -s "Report" input
+  # $ echo ('README.MD') | mail -s "Report" input
