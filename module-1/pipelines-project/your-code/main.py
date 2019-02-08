@@ -143,3 +143,15 @@ if __name__ == '__main__':
   save_viz(grafico2,title1)
   save_viz(grafico3,title2)
   '''
+
+
+  ## SEND EMAIL WITH REPORT:
+
+  import subprocess
+
+  input = "Enter your email:"
+
+  def bash_command(cmd):
+    subprocess.Popen(['/bin/bash', '-c', cmd])
+
+  # $ echo ('Report .odt') | mail -s "Report" input
