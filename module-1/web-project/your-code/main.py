@@ -70,18 +70,34 @@ def lista_IDs(artist_list):
 
 def artist_df (artistID): # crea un df con los conciertos de cada artista
     
-    def events_page (artistID): #Conciertos por pagina y por artista
+    def num_pag(artistID):
         url = 'https://api.songkick.com/api/3.0/artists/{}/gigography.json?apikey=2KYDpKnYhVp98ZmM'.format(artistID)
-        get_events = requests.get(url)
-        all_concerts= get_events.json()
-        events = all_concerts['resultsPage']['results']['event']
-        events_per_page = []
-        for event in events:
-            each_event = event['type'],event['displayName'],event['location']['city'],event['start']['date']
-            events_per_page.append(each_event)
-        return events_per_page
+        get_events_page = requests.get(url)
+        all_concerts= get_events_page.json()
+        total_concerts =int(all_concerts['resultsPage']['totalEntries'])
+        n_pages= int((total_concerts / 50) + (total_concerts % 5 > 0))
+        return n_pages
+ 
+    def events_all(artistID,n_pages):
+        all_concerts = []
+        todos_los_conciertos = []
+        for p in range(1, n_pages + 1):
+            url = 'https://api.songkick.com/api/3.0/artists/{}/gigography.json?apikey=2KYDpKnYhVp98ZmM&page='.format(artistID)
+            page_url= url + str(p)
+            get_events_page = requests.get(page_url)
+            all_concerts_page= get_events_page.json()
+            events = all_concerts_page['resultsPage']['results']['event']
+            events_per_page = []
+            for event in events:
+                each_event = event['type'],event['displayName'],event['location']['city'],event['start']['date']
+                events_per_page.append(each_event)
+            all_concerts.append(events_per_page)
+        for lista in all_concerts:
+            for tupla in lista:
+                todos_los_conciertos.append(tupla)
+        return todos_los_conciertos
     
-    conciertos_artista = pd.DataFrame(events_page (artistID), columns=['type_event','name_event','city_event','date_event'])
+    conciertos_artista = pd.DataFrame(events_all(artistID,num_pag(artistID)), columns=['type_event','name_event','city_event','date_event'])
     conciertos_artista['artist_id'] = artistID
     return conciertos_artista
 
